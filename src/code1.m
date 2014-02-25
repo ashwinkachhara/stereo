@@ -11,6 +11,7 @@ er = edge(rgb2gray(ir), 'canny');
 
 wsize = 3;
 
+% img3 contains the disparities of the edge points
 img3 = zeros(M,N);
 
 
@@ -25,12 +26,22 @@ for i=1+wsize:M-wsize,
             end
             [maxval, ind] = findpeaks(correl);
             if (numel(ind)>0)
-                img3(i,j) = ind(1);
+                img3(i,j) = ind(1)-j;
             else
-                img3(i,j) = j+1;
+                img3(i,j) = 1;
             end
 %             disp([i j img3(i,j)])
         end
     end
 end
 
+
+% for i=1:375,
+%     for j=1:450,
+%         if(img3(i,j))
+%             img3(i,j) = img3(i,j) - j;
+%         end
+%     end
+% end
+
+save('sparse-disparity.mat','img3');
