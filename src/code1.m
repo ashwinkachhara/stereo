@@ -1,7 +1,21 @@
-il = imread('teddy/im2.png');
-ir = imread('teddy/im6.png');
-el = edge(lpfimg(il), 'canny');
-er = edge(lpfimg(ir), 'canny');
+ileft = imread('aloe/view0.png');
+iright = imread('aloe/view1.png');
+[m, n] = size(ileft);
+
+% res = 200/m;
+% 
+% il = imresize(il,res);
+% ir = imresize(ir,res);
+
+
+% el = edge(lpfimg(il), 'canny');
+% er = edge(lpfimg(ir), 'canny');
+il = double(rgb2gray(ileft));
+ir = double(rgb2gray(iright));
+% el = edge(il, 'canny');
+% er = edge(ir, 'canny');
+el = edge(il, 'canny',0.01);
+er = edge(ir, 'canny',0.01);
 
 %el = meanfilt (double(el));
 %er = meanfilt (double(er));
@@ -10,42 +24,48 @@ er = edge(lpfimg(ir), 'canny');
 % figure(2)
 % imshow(er)
 
-[M, N] = size(el);
 
-wsize = 9;
+[M, N] = size(il);
+wsize = 12;
+win = -wsize:wsize;
 
 img3 = zeros(M,N);
 mask = zeros(M,N);
 
-max_disparity = 100;
 
-for i=1+wsize:M-wsize,
-    for j=1+wsize:N-wsize,
-        if(el(i,j))
-%             disp([i j])
+disp(['Dimensions : H =' num2str(M) ' | W =' num2str(N)])
+
+for i=(1+wsize):(M-wsize),
+    for j=(1+wsize):(N-wsize),
+        if(er(i,j))
+%             disp(['-- Coloumn: ' num2str(j)])
             
-            correl = zeros(N,1);
-            for k=j+1:min(floor(min(j+N/2,N-wsize-1)),j+round(max_disparity)),
-                kk = -wsize:wsize;
-                correl(k-j) = (1+3/(k-j))*corr2(el(i+kk,j+kk),er(i+kk,k+kk));
+            A = ir(i+win,j+win)/sqrt(sum(sum( ir(i+win,j+win) .* ir(i+win,j+win) )));
+            B = il(i+win,j+win)/sqrt(sum(sum( il(i+win,j+win) .* il(i+win,j+win) )));
+            max = corr2(A,B);
+            for k =(j+1):(N-wsize-1),
+                B = il(i+win,k+win)/sqrt(sum(sum( il(i+win,k+win) .* il(i+win,k+win) )));
+                correl = corr2(A,B);
+                if(max < correl)
+                    img3(i,j) = k-j;    
+                    max = correl;
+%                     disp(['--correl = ' num2str(correl) ' | (' num2str(i) ',' num2str(j) ')' ' | disparity = ' num2str(img3(i,j)) ])
+%                     disp([i j img3(i,j) min])a
+                end
             end
             
-%             [maxval, ind] = findpeaks(correl);
-            [maxval, indmax] = max(correl);
-            
-            if (numel(indmax)>0  )%&& maxval(1) > correl(1))
-                mask(i,j) = 1;
-                img3(i,j) = indmax;
-            else
-                img3(i,j) = 0;
-                mask(i,j) = 0;
+            mask(i,j) = 1;
+            if(img3(i,j) > 100)
+               img3(i,j) = 0;
+               er(i,j) = 0;
+               mask(i,j) = 0;
             end
-%             disp([i j img3(i,j)])
+            
         else
             mask(i,j) = 0;
         end
     end
-    disp(i)
+    disp(['Processing Row: ' num2str(i)])
 end
 
 save('DataFile.mat', 'mask', 'img3');
