@@ -12,8 +12,10 @@ iright = imread('aloe/view1.png');
 % er = edge(lpfimg(ir), 'canny');
 il = double(rgb2gray(ileft));
 ir = double(rgb2gray(iright));
-% el = edge(il, 'canny');
-% er = edge(ir, 'canny');
+
+il = stereogram_left;
+ir = stereogram_right;
+
 el = edge(il, 'canny',0.01);
 er = edge(ir, 'canny',0.01);
 
@@ -24,6 +26,7 @@ er = edge(ir, 'canny',0.01);
 % figure(2)
 % imshow(er)
 
+max_disparity = 80;
 
 [M, N] = size(il);
 wsize = 12;
@@ -55,7 +58,7 @@ for i=(1+wsize):(M-wsize),
             end
             
             mask(i,j) = 1;
-            if(img3(i,j) > 100)
+            if(img3(i,j) > max_disparity)
                img3(i,j) = 0;
                er(i,j) = 0;
                mask(i,j) = 0;
