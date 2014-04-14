@@ -2,7 +2,7 @@
 
 [M, N] = size(img3);
 
-iters = 3000;
+iters = 2000;
 n_depth = img3;
 depth = img3;
 p=1;

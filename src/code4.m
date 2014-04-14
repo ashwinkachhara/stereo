@@ -5,8 +5,8 @@ stereogram_right = rand(M,N);
 
 stereogram_right = round(stereogram_right);
 
-m=20;
-n=30;
+m=80;
+n=80;
 xi = 91;
 yi = 101;
 disparity = 10;

@@ -1,20 +1,21 @@
 ileft = imread('aloe/view0.png');
 iright = imread('aloe/view1.png');
+
 [m, n] = size(ileft);
 
-% res = 200/m;
+
+il = double(rgb2gray(ileft));
+ir = double(rgb2gray(iright));
 % 
+% res = 200/m;
 % il = imresize(il,res);
 % ir = imresize(ir,res);
 
-
-% el = edge(lpfimg(il), 'canny');
-% er = edge(lpfimg(ir), 'canny');
-il = double(rgb2gray(ileft));
-ir = double(rgb2gray(iright));
-
-il = stereogram_left;
-ir = stereogram_right;
+% il = stereogram_left;
+% ir = stereogram_right;
+% H =fspecial('gaussian',[3 3], 1);
+% il=imfilter(il,H);
+% ir=imfilter(ir,H);
 
 el = edge(il, 'canny',0.01);
 er = edge(ir, 'canny',0.01);
@@ -26,10 +27,11 @@ er = edge(ir, 'canny',0.01);
 % figure(2)
 % imshow(er)
 
-max_disparity = 80;
+max_disparity = 60;
 
 [M, N] = size(il);
-wsize = 12;
+wsize = 25;
+wsize = (wsize -1)/2;
 win = -wsize:wsize;
 
 img3 = zeros(M,N);
@@ -45,23 +47,24 @@ for i=(1+wsize):(M-wsize),
             
             A = ir(i+win,j+win)/sqrt(sum(sum( ir(i+win,j+win) .* ir(i+win,j+win) )));
             B = il(i+win,j+win)/sqrt(sum(sum( il(i+win,j+win) .* il(i+win,j+win) )));
-            max = corr2(A,B);
+            maxi = corr2(A,B);
             for k =(j+1):(N-wsize-1),
                 B = il(i+win,k+win)/sqrt(sum(sum( il(i+win,k+win) .* il(i+win,k+win) )));
                 correl = corr2(A,B);
-                if(max < correl)
+                if(maxi < correl)
                     img3(i,j) = k-j;    
-                    max = correl;
+                    maxi = correl;
 %                     disp(['--correl = ' num2str(correl) ' | (' num2str(i) ',' num2str(j) ')' ' | disparity = ' num2str(img3(i,j)) ])
 %                     disp([i j img3(i,j) min])a
                 end
             end
             
             mask(i,j) = 1;
-            if(img3(i,j) > max_disparity)
+            
+            if(maxi < 0.70 || img3(i,j)>max_disparity)
                img3(i,j) = 0;
                er(i,j) = 0;
-               mask(i,j) = 0;
+               mask(i,j) = 0;      
             end
             
         else

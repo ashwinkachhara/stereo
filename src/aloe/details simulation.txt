@@ -1,0 +1,4 @@
+Aloe
+win = 25
+max disparity threshold = 40
+canny threshold = 0.05
